@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FiMail, FiArrowLeft } from "react-icons/fi";
 import "./styles.css";
 
 export default function EmailVerify() {
   const navigate = useNavigate();
+  const { email } = useParams();
+  const decodedEmail = decodeURIComponent(email);
+
   const inputs = useRef([]);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -69,9 +72,7 @@ export default function EmailVerify() {
 
           <p className="subtext">
             We’ve sent a code to <br />
-            <span className="email-text">
-              yourmail@example.com
-            </span>
+            <span className="email-text">{decodedEmail}</span>
           </p>
 
           <div className="otp-box">
@@ -88,10 +89,19 @@ export default function EmailVerify() {
           </div>
 
           <p className="resend">
-            Resend code in{" "}
-            <span>
-              00:{time.toString().padStart(2, "0")}
-            </span>
+            {time > 0 ? (
+              <>
+                Resend code in{" "}
+                <span>00:{time.toString().padStart(2, "0")}</span>
+              </>
+            ) : (
+              <span
+                style={{ color: "#7c3aed", cursor: "pointer" }}
+                onClick={() => setTime(45)}
+              >
+                Resend Code
+              </span>
+            )}
           </p>
 
           <button

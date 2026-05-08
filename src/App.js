@@ -7,9 +7,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/mobile" />} />
-        <Route path="/mobile" element={<MobileVerify />} />
-        <Route path="/email" element={<EmailVerify />} />
+        <Route path="/" element={<Navigate to="/mobile/9876543210" />} />
+        <Route path="/mobile/:phone" element={<MobileVerify />} />
+        <Route path="/email/:email" element={<EmailVerify />} />
         <Route path="/success" element={<Success />} />
       </Routes>
     </BrowserRouter>

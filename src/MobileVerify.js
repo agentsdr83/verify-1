@@ -1,32 +1,28 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FiSmartphone } from "react-icons/fi";
 import "./styles.css";
 
 export default function MobileVerify() {
   const navigate = useNavigate();
+  const { phone } = useParams();
   const inputs = useRef([]);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [time, setTime] = useState(45);
 
-  // ✅ TIMER LOGIC
   useEffect(() => {
     if (time === 0) return;
-
-    const timer = setInterval(() => {
-      setTime((t) => t - 1);
-    }, 1000);
-
+    const timer = setInterval(() => setTime((t) => t - 1), 1000);
     return () => clearInterval(timer);
   }, [time]);
 
   const handleChange = (val, i) => {
     if (!/^\d*$/.test(val)) return;
 
-    const newOtp = [...otp];
-    newOtp[i] = val.slice(-1);
-    setOtp(newOtp);
+    const updated = [...otp];
+    updated[i] = val.slice(-1);
+    setOtp(updated);
 
     if (val && i < 5) inputs.current[i + 1].focus();
   };
@@ -51,7 +47,7 @@ export default function MobileVerify() {
 
         <p className="subtext">
           We’ve sent a 6-digit OTP to <br />
-          <span className="highlight">+91 98765 43210</span>
+          <span className="highlight">+91 {phone}</span>
         </p>
 
         <div className="otp-box">
@@ -66,7 +62,6 @@ export default function MobileVerify() {
           ))}
         </div>
 
-        {/* ✅ TIMER DISPLAY */}
         <p className="resend">
           {time > 0 ? (
             <>
