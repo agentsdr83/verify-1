@@ -6,16 +6,24 @@ import "./styles.css";
 export default function EmailVerify() {
   const navigate = useNavigate();
   const { email } = useParams();
+
   const decodedEmail = decodeURIComponent(email);
+  const API_URL = process.env.REACT_APP_API_URL;
+  console.log("API_URL", API_URL);
 
   const inputs = useRef([]);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [time, setTime] = useState(45);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (time === 0) return;
-    const timer = setInterval(() => setTime((t) => t - 1), 1000);
+
+    const timer = setInterval(() => {
+      setTime((t) => t - 1);
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [time]);
 
@@ -24,9 +32,12 @@ export default function EmailVerify() {
 
     const updated = [...otp];
     updated[i] = val.slice(-1);
+
     setOtp(updated);
 
-    if (val && i < 5) inputs.current[i + 1].focus();
+    if (val && i < 5) {
+      inputs.current[i + 1].focus();
+    }
   };
 
   const handleBackspace = (e, i) => {
@@ -35,31 +46,48 @@ export default function EmailVerify() {
     }
   };
 
-  const handleVerify = () => {
-    if (otp.join("") === "123456") {
-      navigate("/success", { state: { type: "email" } });
-    } else {
+  const handleVerify = async () => {
+    if (otp.join("") !== "123456") {
       alert("Invalid Code");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await fetch(
+        `${API_URL}/verify-email/${encodeURIComponent(decodedEmail)}`,
+        {
+          method: "POST",
+        }
+      );
+
+      navigate("/success", {
+        state: { type: "email" },
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Verification failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="email-wrapper">
-
-      {/* LEFT */}
       <div className="email-left">
         <div className="logo">LOS</div>
+
         <h1>Verify your email</h1>
+
         <p>
           Enter the 6-digit verification code sent to your email
           to complete authentication.
         </p>
       </div>
 
-      {/* RIGHT */}
       <div className="email-right">
         <div className="email-card">
-
           <div className="back" onClick={() => navigate(-1)}>
             <FiArrowLeft />
           </div>
@@ -92,11 +120,16 @@ export default function EmailVerify() {
             {time > 0 ? (
               <>
                 Resend code in{" "}
-                <span>00:{time.toString().padStart(2, "0")}</span>
+                <span>
+                  00:{time.toString().padStart(2, "0")}
+                </span>
               </>
             ) : (
               <span
-                style={{ color: "#7c3aed", cursor: "pointer" }}
+                style={{
+                  color: "#7c3aed",
+                  cursor: "pointer",
+                }}
                 onClick={() => setTime(45)}
               >
                 Resend Code
@@ -106,12 +139,11 @@ export default function EmailVerify() {
 
           <button
             className="purple-btn"
-            disabled={otp.join("").length !== 6}
+            disabled={otp.join("").length !== 6 || loading}
             onClick={handleVerify}
           >
-            Verify Code
+            {loading ? "Verifying..." : "Verify Code"}
           </button>
-
         </div>
       </div>
     </div>

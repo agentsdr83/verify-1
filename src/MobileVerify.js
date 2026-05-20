@@ -6,10 +6,15 @@ import "./styles.css";
 export default function MobileVerify() {
   const navigate = useNavigate();
   const { phone } = useParams();
+
+  const API_URL = process.env.REACT_APP_API_URL;
+  console.log("API_URL", API_URL);
+
   const inputs = useRef([]);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [time, setTime] = useState(45);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (time === 0) return;
@@ -27,11 +32,26 @@ export default function MobileVerify() {
     if (val && i < 5) inputs.current[i + 1].focus();
   };
 
-  const handleVerify = () => {
-    if (otp.join("") === "123456") {
+  const handleVerify = async () => {
+    if (otp.join("") !== "123456") {
+      alert("Invalid OTP");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await fetch(`${API_URL}/verify-mobile/${phone}`, {
+        method: "POST",
+      });
+
       navigate("/success", { state: { type: "mobile" } });
-    } else {
-      alert("Invalid OTP (use 123456)");
+
+    } catch (err) {
+      console.error(err);
+      alert("Verification failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,8 +98,12 @@ export default function MobileVerify() {
           )}
         </p>
 
-        <button className="blue-btn" onClick={handleVerify}>
-          Verify OTP
+        <button
+          className="blue-btn"
+          onClick={handleVerify}
+          disabled={loading}
+        >
+          {loading ? "Verifying..." : "Verify OTP"}
         </button>
 
       </div>
